@@ -1,32 +1,50 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <transition :name='transitionName' :mode="this.$router.back ? 'out-in' : 'in-out' ">
+    <router-view class="view"/>
+    </transition>
   </div>
 </template>
 
+<script>
+export default {
+  created() {
+    const counterMap = JSON.parse(localStorage.getItem('goods')) || {};
+    this.$store.commit('setCounterMap', counterMap);
+  },
+  data() {
+    return {
+      transitionName: 'left',
+    };
+  },
+  watch: {
+    $route(to, from) {
+      if (to.name === 'classify' && from.name === 'search') {
+        this.$router.back = true;
+      }
+      if (this.$router.back) {
+        this.transitionName = 'right';
+      } else {
+        this.transitionName = 'left';
+      }
+      this.$router.back = false;
+    },
+  },
+};
+</script>
+
 <style lang="less">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+.view{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  transition: transform .3s linear;
 }
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+.left-enter{
+  transform: translate(100%, 0);
+}
+.right-leave-to{
+  transform: translate(100%, 0);
 }
 </style>
